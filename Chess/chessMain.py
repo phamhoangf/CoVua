@@ -41,10 +41,28 @@ if __name__ == '__main__':
     gs = chessModule.GameState()
     loadImage()
     running = True
+    sqSelected = ()
+    playerClick = []
     while running:
         for e in pg.event.get():
             if e.type == pg.quit:
                 running = False
+            elif e.type == pg.MOUSEBUTTONDOWN:
+                location = pg.mouse.get_pos() #(x,y)
+                file = location[0] // sqSize
+                rank = location[1] // sqSize
+                if sqSelected == (rank,file):
+                    sqSelected = ()
+                    playerClick = []
+                else:
+                    sqSelected = (rank,file)
+                    playerClick.append(sqSelected)
+                
+                if len(playerClick) == 2:
+                    move = chessModule.Move(playerClick[0],playerClick[1],gs.board)
+                    gs.makeMove(move)
+                    sqSelected = ()
+                    playerClick = []
         drawGameState(screen,gs)
         clock.tick(MAX_FPS)
         pg.display.flip()
