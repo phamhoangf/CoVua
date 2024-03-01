@@ -19,18 +19,18 @@ def drawGameState(screen,gs):
 
 def drawBoard(screen):
     colors = [pg.Color('white'),pg.Color('grey')]
-    for rank in range (DIMENSION):
-        for file in range (DIMENSION):
-            color = colors[(rank+file)%2]
-            pg.draw.rect(screen,color,pg.Rect(file*sqSize,rank*sqSize,sqSize,sqSize))
+    for row in range (DIMENSION):
+        for col in range (DIMENSION):
+            color = colors[(row+col)%2]
+            pg.draw.rect(screen,color,pg.Rect(col*sqSize,row*sqSize,sqSize,sqSize))
 
 
 def drawPieces(screen,board):
-    for rank in range (DIMENSION):
-        for file in range (DIMENSION):
-            piece = board[rank][file]
+    for row in range (DIMENSION):
+        for col in range (DIMENSION):
+            piece = board[row][col]
             if piece != "--":
-                screen.blit(IMAGES[piece],pg.Rect(file*sqSize,rank*sqSize,sqSize,sqSize))
+                screen.blit(IMAGES[piece],pg.Rect(col*sqSize,row*sqSize,sqSize,sqSize))
 
 #main
 if __name__ == '__main__':
@@ -49,13 +49,13 @@ if __name__ == '__main__':
                 running = False
             elif e.type == pg.MOUSEBUTTONDOWN:
                 location = pg.mouse.get_pos() #(x,y)
-                file = location[0] // sqSize
-                rank = location[1] // sqSize
-                if sqSelected == (rank,file):
+                col = location[0] // sqSize
+                row = location[1] // sqSize
+                if sqSelected == (row,col):
                     sqSelected = ()
                     playerClick = []
                 else:
-                    sqSelected = (rank,file)
+                    sqSelected = (row,col)
                     playerClick.append(sqSelected)
                 
                 if len(playerClick) == 2:
