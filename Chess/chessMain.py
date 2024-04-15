@@ -147,13 +147,13 @@ if __name__ == '__main__':
                         
         drawGameState(screen,gs, validMoves, sqSelected)
 
-        if gs.checkmate:
+        if gs.checkMate:
             gameOver = True
             if gs.whiteMove:
                 drawText(screen, 'Black win by checkmate')
             else:
                 drawText(screen, 'White win bt checkmate')
-        elif gs.stalemate:
+        elif gs.staleMate:
             gameOver = True
             drawText(screen, 'Statemate')
 

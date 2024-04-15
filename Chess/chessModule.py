@@ -18,7 +18,7 @@ class GameState():
         self.moveLog = []
         self.whiteKingLocation = (7,4)
         self.blackKingLocation = (0,4) 
-        self.chechMate = False
+        self.checkMate = False
         self.staleMate = False  
         self.enpassantPossible = ()
         self.pins = []
@@ -106,7 +106,7 @@ class GameState():
     '''
     Update the castle rights given the move
     '''
-    def undateCatleRights(self, move):
+    def undateCastleRights(self, move):
         if move.pieceMoved == 'wK':
             self.currentCastlingRight.wks = False
             self.currentCastlingRight.wqs = False
@@ -420,11 +420,11 @@ class Move():
         #pawn promotion
         self.isPawnPromotion = (self.pieceMoved == 'wp' and self.endRow == 0) and (self.pieceMoved == 'bp' and self.endRow == 7)
         #en passant
-        self.inEnpassantMove = isEnpassantMove
-        if self.inEnpassantMove:
+        self.isEnpassantMove = isEnpassantMove
+        if self.isEnpassantMove:
             self.pieceCaptured = 'wp' if self.pieceMoved == 'bp' else 'bp'
         #castle move
-            self.isCastleMove = isCastleMove
+        self.isCastleMove = isCastleMove
 
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
         
