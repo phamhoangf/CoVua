@@ -195,14 +195,6 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiple):
     global nextMove
     if depth == 0:
         return turnMultiple * scoreBoard(gs)
-    
-    # move ordering
-    move_scores = {}
-    for move in validMoves:
-        gs.makeMove(move)
-        move_scores[str(move)] = scoreBoard(gs)
-        gs.undoMove()
-    validMoves = sorted(validMoves, key=lambda move: move_scores[str(move)], reverse=True)
 
     maxScore = -CHECKMATE
     for move in validMoves:
