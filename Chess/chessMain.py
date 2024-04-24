@@ -35,6 +35,7 @@ The main driver for our code. This will handle user input and updating the graph
 
 def main():
     p.init()
+    p.display.set_caption("Chess")
     screen = p.display.set_mode((BOARD_WIDTH + MOVE_LOG_PANEL_WIDTH, BOARD_HEIGHT))
     clock = p.time.Clock()
     screen.fill(p.Color('white'))
@@ -213,7 +214,7 @@ def drawMoveLog(screen, gs, font):
     p.draw.rect(screen, p.Color("black"), moveLogRect)
     moveLog = gs.moveLog
     message1 = "Welcome!!!"
-    message2 = "The side has been randomly chosen."
+    message2 = "The sides has been randomly chosen."
     message3 = "Press 'z' to undo the lasted move."
     message4 = "Press 'r' to restart the game."
     message5 = "On your turn, select the chess piece you want "
