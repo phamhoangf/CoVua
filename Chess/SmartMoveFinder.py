@@ -114,8 +114,7 @@ def findBestMoveMinMaxNotRecursion(gs, validMoves):
 def findBestMove(gs, validMoves, returnQueue):
     global nextMove
     nextMove = None
-    # findMoveMinMax(gs, validMoves, DEPTH, gs.whiteToMove)
-
+    #findMoveMinMaxAlphaBeta(gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
     findMoveNegaMaxAlphaBeta(gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
 
     returnQueue.put(nextMove)
@@ -149,6 +148,32 @@ def findMoveMinMax(gs, validMoves, depth, whiteToMove):
             gs.undoMove()
         return minScore
     
+def findMoveMinMaxAlphaBeta(gs, validMoves, depth, alpha, beta, whiteToMove):
+    global nextMove
+    if depth == 0:
+        return scoreMaterial(gs.board)
+    bestScore = -CHECKMATE if whiteToMove else CHECKMATE
+    for move in validMoves:
+        gs.makeMove(move)
+        nextMoves = gs.getValidMoves()
+        score = findMoveMinMaxAlphaBeta(gs, nextMoves, depth-1, alpha, beta, False)
+        
+        if whiteToMove:
+            bestScore = max(bestScore, score)
+            alpha = max(alpha, bestScore)
+            if depth == DEPTH:
+                nextMove = move
+        else:
+            bestScore = min(bestScore, score)
+            bestScore = min(beta, bestScore)
+            if depth == DEPTH:
+                nextMove = move
+        gs.undoMove()
+
+        if alpha <= beta:
+            break
+    return bestScore
+    
 def findMoveNegaMax(gs, validMoves, depth, turnMultiple):
     global nextMove
     if depth == 0:
@@ -171,6 +196,14 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiple):
     if depth == 0:
         return turnMultiple * scoreBoard(gs)
     
+    # move ordering
+    move_scores = {}
+    for move in validMoves:
+        gs.makeMove(move)
+        move_scores[str(move)] = scoreBoard(gs)
+        gs.undoMove()
+    validMoves = sorted(validMoves, key=lambda move: move_scores[str(move)], reverse=True)
+
     maxScore = -CHECKMATE
     for move in validMoves:
         gs.makeMove(move)
@@ -207,16 +240,16 @@ def scoreMaterial(gs):
             square = gs.board[row][col]
             if square != '--':
 
-                # # score positionally
-                # piecePositionScore = 0
-                # if square[1] != 'K': # no position score table for king
-                #     if square[1] == 'p': # for pawn move
-                #         piecePositionScore = piecePositionScores[square][row][col]
-                #     else: #other pieces
-                #         piecePositionScore = piecePositionScores[square[1]][row][col]  
+                # score positionally
+                piecePositionScore = 0
+                if square[1] != 'K': # no position score table for king
+                    if square[1] == 'p': # for pawn move
+                        piecePositionScore = piecePositionScores[square][row][col]
+                    else: #other pieces
+                        piecePositionScore = piecePositionScores[square[1]][row][col]  
 
                 if square[0] == 'w':
-                    score += pieceScore[square[1]] #+ piecePositionScore * .1
+                    score += pieceScore[square[1]] + piecePositionScore * .1
                 elif square[0] == 'b':
-                    score -= pieceScore[square[1]] #+ piecePositionScore * .1
+                    score -= pieceScore[square[1]] + piecePositionScore * .1
     return score
