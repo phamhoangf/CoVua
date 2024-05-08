@@ -4,7 +4,7 @@ It will be responsible for handling user input and displaying the current GameSt
 """
 
 import pygame as p
-import chessModule, SmartMoveFinder
+import chessModule, Alphabeta
 import random
 from multiprocessing import Process, Queue
 
@@ -49,8 +49,8 @@ def main():
     sqSelected = ()  # no square is selected, keep track of the last click of the user (tuple: (row, col))
     playerClicks = []  # keep track of player clicks (two tuples: [(6, 4), (4, 4)]
     gameOver = False
-    playerOne = bool(random.randint(0, 1))  # if a human is playing white, then this will be True. If an AI is playing then it will be False
-    playerTwo = not(playerOne)  # same as above but for black
+    playerOne = bool(random.randint(0, 1))  #if a human is playing white, then this will be True. If an AI is playing then it will be False
+    playerTwo = not(playerOne)   #same as above but for black
     AIThinking = False
     moveFinderProcess = None
     moveUndone = False
@@ -113,14 +113,14 @@ def main():
                 AIThinking = True
                 print("thinking...")
                 returnQueue = Queue()
-                moveFinderProcess = Process(target = SmartMoveFinder.findBestMove, args = (gs, validMoves, returnQueue))
+                moveFinderProcess = Process(target = Alphabeta.findBestMove, args = (gs, validMoves, returnQueue))
                 moveFinderProcess.start()
             if not moveFinderProcess.is_alive():  
                 print("done thinking")
                 AIMove =  returnQueue.get()
                 # AIMove = SmartMoveFinder.findBestMove(gs, validMoves)
                 if AIMove is None:
-                    AIMove = SmartMoveFinder.findRandomMove(validMoves)
+                    AIMove = Alphabeta.findRandomMove(validMoves)
                 gs.makeMove(AIMove)
                 moveMade = True
                 animate = True
@@ -186,7 +186,7 @@ Draw the squares on the board. The top left square is always light.
 
 def drawBoard(screen):
     global colors
-    colors = [p.Color('white'), p.Color('grey')]
+    colors = [p.Color('white'), p.Color(98, 161, 98)]
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             color = colors[((r + c) % 2)]
@@ -235,7 +235,7 @@ def drawMoveLog(screen, gs, font):
     textY = padding
     for i in range(len(moveTexts)):
         text = moveTexts[i]
-        textObject = font.render(text, 1, p.Color('White'))
+        textObject = font.render(text, 1, p.Color('white'))
         textLocation = moveLogRect.move(padding, textY)
         screen.blit(textObject, textLocation)
         textY += textObject.get_height() + padding
@@ -264,7 +264,7 @@ def animateMove(move, screen, board, clock):
         if move.pieceCaptured != '--':
             if move.isEnpassantMove:
                 enPassantRow = move.endRow + 1 if move.pieceCaptured[0] == 'b' else move.endRow - 1
-                endSquare = p.Rect(move.endCol * SQ_SIZE, enPassantRow * SQ_SIZE, SQ_SIZE)
+                endSquare = p.Rect(move.endCol * SQ_SIZE, enPassantRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
             screen.blit(IMAGES[move.pieceCaptured], endSquare)
         # draw moving pieces
         screen.blit(IMAGES[move.pieceMoved], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))

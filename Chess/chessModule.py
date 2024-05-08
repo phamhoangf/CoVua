@@ -30,7 +30,7 @@ class GameState():
         self.checkMate = False
         self.staleMate = False
         self.enpassantPossible = ()  # coordinates for the square where en passant captures is possible
-        #Modify en passant
+        # Modify en passant
         self.enpassantPossibleLog = [self.enpassantPossible]
 
         self.currentCastlingRight = CastleRights(True, True, True, True)
@@ -103,15 +103,12 @@ class GameState():
             if move.isEnpassantMove:
                 self.board[move.endRow][move.endCol] = '--'  # leave landing square blank
                 self.board[move.startRow][move.endCol] = move.pieceCaptured
-                # self.enpassantPossible = (move.endRow, move.endCol)
             
             self.enpassantPossibleLog.pop()
             self.enpassantPossible = self.enpassantPossibleLog[-1]
 
             # undo castling rights
             self.castleRightsLog.pop()  # get rid of the new castle rights from the move we are undoing
-            # set the current castle rights to the last one in the list
-            # self.currentCastlingRight = self.castleRightsLog[-1]
 
             # Modify castling
 
