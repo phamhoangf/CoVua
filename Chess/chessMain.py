@@ -27,6 +27,31 @@ def loadImages():
         IMAGES[piece] = p.transform.scale(p.image.load('Chess/images/' + piece + '.png'), (SQ_SIZE, SQ_SIZE))
     # Note: we can access an image by saying 'IMAGES['wp']'
 
+def displayPlayModeSelection(screen):
+    screen.fill(p.Color('black'))
+    font = p.font.SysFont('Arial', 24)
+    text = font.render("Select Play Mode", True, p.Color('White'))
+    text_rect = text.get_rect(center=((BOARD_WIDTH + MOVE_LOG_PANEL_WIDTH) // 2, BOARD_HEIGHT // 2 - 100))
+    screen.blit(text, text_rect)
+    
+    pvp_button = p.Rect(286, 200, 200, 50)
+    pvc_button = p.Rect(276, 300, 220, 50)
+    quit_button = p.Rect(296, 400, 180, 50)
+    
+    p.draw.rect(screen, p.Color('gray'), pvp_button)
+    p.draw.rect(screen, p.Color('gray'), pvc_button)
+    p.draw.rect(screen, p.Color('gray'), quit_button)
+    
+    pvp_text = font.render("Player vs Player", True, p.Color('black'))
+    pvc_text = font.render("Player vs Computer", True, p.Color('black'))
+    quit_text = font.render("Quit", True, p.Color('black'))
+    
+    screen.blit(pvp_text, (pvp_button.x + 25, pvp_button.y + 10))
+    screen.blit(pvc_text, (pvc_button.x + 25, pvc_button.y + 10))
+    screen.blit(quit_text, (quit_button.x + 70, quit_button.y + 10))
+    
+    return pvp_button, pvc_button, quit_button
+
 
 """
 The main driver for our code. This will handle user input and updating the graphics
@@ -39,7 +64,7 @@ def main():
     screen = p.display.set_mode((BOARD_WIDTH + MOVE_LOG_PANEL_WIDTH, BOARD_HEIGHT))
     clock = p.time.Clock()
     screen.fill(p.Color('white'))
-    moveLogFont = p.font.SysFont('Helvitca', 16, True, False)
+    moveLogFont = p.font.SysFont('Arial', 14, True, False)
     gs = chessModule.GameState()
     validMoves = gs.getValidMoves()
     moveMade = False  # flag variable for when a move is made
@@ -49,13 +74,41 @@ def main():
     sqSelected = ()  # no square is selected, keep track of the last click of the user (tuple: (row, col))
     playerClicks = []  # keep track of player clicks (two tuples: [(6, 4), (4, 4)]
     gameOver = False
-    playerOne = bool(random.randint(0, 1))  #if a human is playing white, then this will be True. If an AI is playing then it will be False
-    playerTwo = not(playerOne)   #same as above but for black
+    playerOne = True#bool(random.randint(0, 1))  #if a human is playing white, then this will be True. If an AI is playing then it will be False
+    playerTwo = False#not(playerOne)   #same as above but for black
     AIThinking = False
     moveFinderProcess = None
     moveUndone = False
-
+    play_mode_selected = False
+    p.mouse.set_cursor(*p.cursors.tri_right)
+    
+    while not play_mode_selected:
+        for event in p.event.get():
+            if event.type == p.QUIT:
+                running = False
+                play_mode_selected = True
+            elif event.type == p.MOUSEBUTTONDOWN:
+                mouse_pos = event.pos
+                if pvp_button.collidepoint(mouse_pos):
+                    # p.draw.rect(screen, p.Color(200,200,200), p.Rect(150, 250, 200, 50))
+                    playerOne = True
+                    playerTwo = True
+                    play_mode_selected = True
+                elif pvc_button.collidepoint(mouse_pos):
+                    # p.draw.rect(screen, p.Color(200,200,200), p.Rect(150, 350, 200, 50))
+                    playerOne = True
+                    playerTwo = False
+                    play_mode_selected = True
+                elif quit_button.collidepoint(mouse_pos):
+                    p.mouse.set_cursor()
+                    play_mode_selected = True
+                    p.quit()
+        pvp_button, pvc_button, quit_button = displayPlayModeSelection(screen)
+        p.display.flip()
+    
     while running:
+
+
         humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
         for e in p.event.get():
             if e.type == p.QUIT:
@@ -137,10 +190,13 @@ def main():
 
         drawGameState(screen, gs, validMoves, sqSelected, moveLogFont)
 
+
         if gs.checkMate or gs.staleMate:
             gameOver = True
             text = 'Stalemate' if gs.staleMate else 'Black wins by checkmate' if gs.whiteToMove else 'White wins by checkmate'
             drawEndGameText(screen, text)
+
+        
 
         clock.tick(MAX_FPS)
         p.display.flip()
@@ -192,6 +248,20 @@ def drawBoard(screen):
             color = colors[((r + c) % 2)]
             p.draw.rect(screen, color, p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
+    # Draw rank notation (numbers)
+    rank_notation = ['8', '7', '6', '5', '4', '3', '2', '1']
+    for i in range(DIMENSION):
+        font = p.font.SysFont('Arial', int(SQ_SIZE /4))  # Adjust the font size as needed
+        text_surface = font.render(rank_notation[i], True, p.Color('black'))
+        screen.blit(text_surface, (5, i * SQ_SIZE + 5))  # Adjust the position as needed
+    
+    # Draw file notation (letters)
+    file_notation = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    for i in range(DIMENSION):
+        font = p.font.SysFont('Arial', int(SQ_SIZE / 4))  # Adjust the font size as needed
+        text_surface = font.render(file_notation[i], True, p.Color('black'))
+        screen.blit(text_surface, ((i+1) * SQ_SIZE - 8, BOARD_HEIGHT - SQ_SIZE/3))  # Adjust the position as needed
+
 
 """
 Draw the pieces on the board using the current GameState.board
@@ -214,7 +284,7 @@ def drawMoveLog(screen, gs, font):
     p.draw.rect(screen, p.Color("black"), moveLogRect)
     moveLog = gs.moveLog
     message1 = "Welcome!!!"
-    message2 = "The sides has been randomly chosen."
+    # message2 = "The sides has been randomly chosen."
     message3 = "Press 'z' to undo the lasted move."
     message4 = "Press 'r' to restart the game."
     message5 = "On your turn, select the chess piece you want "
@@ -222,9 +292,9 @@ def drawMoveLog(screen, gs, font):
     message7 = "Wish you have a pleasant experience!"
     message8 = "                         ----------------------"
     message9 = "Instructions:"
-    moveTexts = [message1, message2,message9, message3, message4, message5, message6, message7, message8]
+    moveTexts = [message1, message9, message3, message4, message5, message6, message7, message8]
     for i in range(0, len(moveLog), 2):
-        if i !=0 and i % 60 == 0:
+        if i !=0 and i % 30 == 0:
             moveTexts = ["Keep going!", message8, moveTexts[-1]]
         moveString = str(i//2 + 1) + '. White: ' + str(moveLog[i]) + '  '
         if i+1 < len(moveLog): #append the black move
@@ -283,3 +353,4 @@ def drawEndGameText(screen, text):
 
 if __name__ == '__main__':
     main()
+    
