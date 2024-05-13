@@ -37,6 +37,22 @@ class GameState():
         self.castleRightsLog = [CastleRights(self.currentCastlingRight.wks, self.currentCastlingRight.bks,
                                              self.currentCastlingRight.wqs, self.currentCastlingRight.bqs)]
 
+
+    """
+    Determine if it was close to end
+    """
+
+    def depth(self):
+        empcnt = sum([row.count('--') for row in self.board])
+        if empcnt < 45:
+            return 3
+        elif empcnt < 55:
+            return 4
+        else:
+            return 5
+
+                    
+    
     """
     Make a Move as a parameter and executes it (this will not work for castling, pawn, promotion, and en-passant)
     """
@@ -185,6 +201,41 @@ class GameState():
         self.enpassantPossible = tempEnpassantPossible
         self.currentCastlingRight = tempCastleRights
         return moves
+    
+    """
+    All capture moves considering checks
+    """
+
+    def getCaptureMoves(self):
+        tempEnpassantPossible = self.enpassantPossible
+        # copy the current castling rights
+        tempCastleRights = CastleRights(self.currentCastlingRight.wks, self.currentCastlingRight.bks,
+                                        self.currentCastlingRight.wqs, self.currentCastlingRight.bqs)
+        # 1.) generate all possible moves
+        moves = self.getAllPossibleCaptureMoves()
+        if self.whiteToMove:
+            self.getCastleMoves(self.whiteKingLocation[0], self.whiteKingLocation[1], moves)
+        else:
+            self.getCastleMoves(self.blackKingLocation[0], self.blackKingLocation[1], moves)
+        # 2.) for each move, make the move
+        for i in range(len(moves) - 1, -1, -1):  # when removing from a list go backwards though that list
+            self.makeMove(moves[i])
+            # 3.) generate all opponent's moves
+            # 4.) for each of your opponent's moves, see if they attack your king
+            self.whiteToMove = not self.whiteToMove
+            if self.inCheck():
+                moves.remove(moves[i])  # 5.) if they do attack your king, not a valid move
+            self.whiteToMove = not self.whiteToMove
+            self.undoMove()
+        if len(moves) == 0:  # either checkmate or stalemate
+            if self.inCheck():
+                self.checkMate = True
+            else:
+                self.staleMate = True
+
+        self.enpassantPossible = tempEnpassantPossible
+        self.currentCastlingRight = tempCastleRights
+        return moves
 
     """
     Determine if the current player is in check
@@ -208,6 +259,22 @@ class GameState():
             if move.endRow == r and move.endCol == c:  # square is under attack
                 return True
         return False
+    
+    """
+    Determine if the enemy pawns can attack the square r, c
+    """
+
+    def squareUnderPawnsAttack(self, r, c):
+        oppoPawnsMoves = []
+        self.whiteToMove = not self.whiteToMove  # switch to opponent's turn
+        for r in range(len(self.board)):  # number of rows
+            for c in range(len(self.board[r])):  # number of cols in given row
+                self.getPawnMoves(r, c, oppoPawnsMoves)
+        self.whiteToMove = not self.whiteToMove  # switch turns back
+        for move in oppoPawnsMoves:
+            if move.endRow == r and move.endCol == c:  # square is under pawns attack
+                return True
+        return False
 
     """
     All moves without considering checks
@@ -222,6 +289,24 @@ class GameState():
                     piece = self.board[r][c][1]
                     self.moveFunctions[piece](r, c, moves)  # calls the appropriate move function based on piece type
         return moves
+    
+    """
+    All capture moves without considering checks
+    """
+
+    def getAllPossibleCaptureMoves(self):
+        moves = []
+        captureMoves = []
+        for r in range(len(self.board)):  # number of rows
+            for c in range(len(self.board[r])):  # number of cols in given row
+                turn = self.board[r][c][0]
+                if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
+                    piece = self.board[r][c][1]
+                    self.moveFunctions[piece](r, c, moves)  # calls the appropriate move function based on piece type
+        for move in moves:
+            if move.pieceCaptured != '--':
+                captureMoves.append(move)
+        return captureMoves
 
     """
     Get all the pawn moves for the pawn located at row, col and add these moves to the list

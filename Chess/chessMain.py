@@ -4,8 +4,9 @@ It will be responsible for handling user input and displaying the current GameSt
 """
 
 import pygame as p
-import chessModule, Alphabeta
-import random
+import chessModule
+import AI
+from AI import SearchMove
 from multiprocessing import Process, Queue
 
 BOARD_WIDTH = BOARD_HEIGHT = 512  # 400 is another option
@@ -52,6 +53,27 @@ def displayPlayModeSelection(screen):
     
     return pvp_button, pvc_button, quit_button
 
+def displaySideSelection(screen):
+    screen.fill(p.Color('black'))
+    font = p.font.SysFont('Arial', 24)
+    text = font.render("Select Your Side", True, p.Color('White'))
+    text_rect = text.get_rect(center=((BOARD_WIDTH + MOVE_LOG_PANEL_WIDTH) // 2, BOARD_HEIGHT // 2 - 100))
+    screen.blit(text, text_rect)
+
+    WHITE_BUTTON = p.Rect(296, 200, 180, 50)
+    BLACK_BUTTON = p.Rect(296, 300, 180, 50)
+
+    p.draw.rect(screen, p.Color('gray'), WHITE_BUTTON)
+    p.draw.rect(screen, p.Color('gray'), BLACK_BUTTON)
+    
+    white_text = font.render("White", True, p.Color('black'))
+    black_text = font.render("Black", True, p.Color('black'))
+    
+    screen.blit(white_text, (WHITE_BUTTON.x + 60, WHITE_BUTTON.y + 10))
+    screen.blit(black_text, (BLACK_BUTTON.x + 60, BLACK_BUTTON.y + 10))
+    
+    return WHITE_BUTTON, BLACK_BUTTON
+
 
 """
 The main driver for our code. This will handle user input and updating the graphics
@@ -79,29 +101,53 @@ def main():
     AIThinking = False
     moveFinderProcess = None
     moveUndone = False
-    play_mode_selected = False
+    play_mode_selected = True
+    side_selected = False
+    is_white = True
     p.mouse.set_cursor(*p.cursors.tri_right)
     
-    while not play_mode_selected:
+    while play_mode_selected:
         for event in p.event.get():
             if event.type == p.QUIT:
                 running = False
-                play_mode_selected = True
+                play_mode_selected = False
             elif event.type == p.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
                 if pvp_button.collidepoint(mouse_pos):
                     # p.draw.rect(screen, p.Color(200,200,200), p.Rect(150, 250, 200, 50))
-                    playerOne = True
-                    playerTwo = True
-                    play_mode_selected = True
+                    playerOne = not True
+                    playerTwo = not True
+                    play_mode_selected = False
                 elif pvc_button.collidepoint(mouse_pos):
                     # p.draw.rect(screen, p.Color(200,200,200), p.Rect(150, 350, 200, 50))
-                    playerOne = True
-                    playerTwo = False
-                    play_mode_selected = True
+                    # playerOne = False
+                    # playerTwo = False
+                    # play_mode_selected = True
+                    side_selected = True
+                    while side_selected:
+                        for event in p.event.get():
+                            if event.type == p.QUIT:
+                                running = False
+                                side_selected = False
+                                play_mode_selected = False
+                            elif event.type == p.MOUSEBUTTONDOWN:
+                                mouse_pos = event.pos
+                                if WHITE_BUTTON.collidepoint(mouse_pos):
+                                    is_white = True
+                                    side_selected = False
+                                    play_mode_selected = False
+                                elif BLACK_BUTTON.collidepoint(mouse_pos):
+                                    is_white = False
+                                    side_selected = False
+                                    play_mode_selected = False
+
+                        WHITE_BUTTON, BLACK_BUTTON = displaySideSelection(screen)
+                        p.display.flip()
+                    playerOne = is_white
+                    playerTwo = not is_white
                 elif quit_button.collidepoint(mouse_pos):
                     p.mouse.set_cursor()
-                    play_mode_selected = True
+                    play_mode_selected = False
                     p.quit()
         pvp_button, pvc_button, quit_button = displayPlayModeSelection(screen)
         p.display.flip()
@@ -166,14 +212,14 @@ def main():
                 AIThinking = True
                 print("thinking...")
                 returnQueue = Queue()
-                moveFinderProcess = Process(target = Alphabeta.findBestMove, args = (gs, validMoves, returnQueue))
+                moveFinderProcess = Process(target = SearchMove.findBestMove, args = (gs, validMoves, returnQueue))
                 moveFinderProcess.start()
             if not moveFinderProcess.is_alive():  
                 print("done thinking")
                 AIMove =  returnQueue.get()
                 # AIMove = SmartMoveFinder.findBestMove(gs, validMoves)
                 if AIMove is None:
-                    AIMove = Alphabeta.findRandomMove(validMoves)
+                    AIMove = SearchMove.findRandomMove(validMoves)
                 gs.makeMove(AIMove)
                 moveMade = True
                 animate = True
@@ -200,6 +246,7 @@ def main():
 
         clock.tick(MAX_FPS)
         p.display.flip()
+
 
 
 """
@@ -294,7 +341,7 @@ def drawMoveLog(screen, gs, font):
     message9 = "Instructions:"
     moveTexts = [message1, message9, message3, message4, message5, message6, message7, message8]
     for i in range(0, len(moveLog), 2):
-        if i !=0 and i % 30 == 0:
+        if i !=0 and i % 38 == 0:
             moveTexts = ["Keep going!", message8, moveTexts[-1]]
         moveString = str(i//2 + 1) + '. White: ' + str(moveLog[i]) + '  '
         if i+1 < len(moveLog): #append the black move
