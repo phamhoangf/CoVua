@@ -198,10 +198,6 @@ def main():
                     moveMade = False
                     animate = False
                     gameOver = False
-                    if AIThinking:
-                        moveFinderProcess.terminate()
-                        AIThinking = False
-                    moveUndone = True
         # AI move finder logic
         if not gameOver and not humanTurn and not moveUndone:
             if not AIThinking:
