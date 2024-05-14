@@ -9,8 +9,6 @@ pieceScore = {
 
 endgameMaterialStart = pieceScore['R'] * 2 + pieceScore['B'] + pieceScore['N']
 
-passedPawnBonuses = [ 0, 120, 80, 50, 30, 15, 15 ]
-isolatedPawnPenaltyByCount = [ 0, -10, -25, -50, -75, -75, -75, -75, -75 ]
 
 knightScores = [[-50,-40,-30,-30,-30,-30,-40,-50],
 			[-40,-20,  0,  0,  0,  0,-20,-40],
@@ -154,6 +152,7 @@ def scoreMaterial(gs):
             square = gs.board[row][col]
             if square != '--':
 
+                # Number of queen and minors
                 if square[1] == 'wQ':
                     numWQueens += 1
                 elif square[1] == 'wR':
@@ -190,11 +189,11 @@ def scoreMaterial(gs):
                         piecePositionScore = piecePositionScores[square][row][col]  
                 
 
-                if square[0] == 'w':
+                if square[0] == 'w': # White
                     whiteScore += pieceScore[square[1]] + piecePositionScore 
                     whiteMaterialScore += pieceScore[square[1]]
         
-                elif square[0] == 'b':
+                elif square[0] == 'b': #Black
                     blackScore += pieceScore[square[1]] + piecePositionScore 
                     blackMaterialScore += pieceScore[square[1]]
                     
@@ -212,7 +211,7 @@ def scoreMaterial(gs):
     whiteScore += forceKingEndgameScore(gs.whiteKingLocation, gs.blackKingLocation, whiteMaterialScore, blackMaterialScore, blackEndgameR)
     blackScore += forceKingEndgameScore(gs.blackKingLocation, gs.whiteKingLocation, blackMaterialScore, whiteMaterialScore, whiteEndgameR)
 
-    # pawn early and pawn late 
+    # pawn early and pawn late phase
     whiteScore += (int)(whitePawnEarly * (1 - blackEndgameR) + whitePawnEnd * blackEndgameR)
     blackScore += (int)(blackPawnEarly * (1 - whiteEndgameR) + blackPawnEnd * whiteEndgameR)
 
@@ -232,10 +231,8 @@ def scoreMaterial(gs):
 
     return score
 
-def EndgamePhaseWeight(scoreWithoutPawns):
-    multiplier = 1 / endgameMaterialStart
-    return 1 - min(1, scoreWithoutPawns * multiplier)
 
+# This will evaluate to force opponent king to edge
 def forceKingEndgameScore(allyKingSquare, opponentKingSquare, myScore, opponentScore, endgameWeight):
     eval = 0
 

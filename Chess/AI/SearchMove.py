@@ -1,4 +1,4 @@
-import time
+
 from AI import Evaluation
 from AI import MoveOrdering
 import random
@@ -9,14 +9,15 @@ DEPTH = 3
 def findRandomMove(validMoves):
     return validMoves[random.randint(0, len(validMoves)-1)]
 
-def findBestMove(gs, validMoves, returnQueue):
+def startSearch(gs, validMoves, returnQueue):
     global nextMove, counter
     counter = 0
     nextMove = None
 
+    # Iterative deppening
     for depth in range(1, DEPTH + 1):
 
-        findMoveNegaMaxAlphaBeta(gs, validMoves, depth, 0, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
+        NegaMaxAlphaBeta(gs, validMoves, depth, 0, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
         if counter >= 8000:
             break
 
@@ -24,11 +25,12 @@ def findBestMove(gs, validMoves, returnQueue):
 
     returnQueue.put(nextMove)
 
-def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, ply, alpha, beta, turnMultiple):
+def NegaMaxAlphaBeta(gs, validMoves, depth, ply, alpha, beta, turnMultiple):
     global nextMove, counter
 
     counter += 1
 
+    # Consider quiet position while depth reached
     if depth == 0 or gs.checkMate or gs.staleMate:
         return quiescenceSearch(gs, alpha, beta, turnMultiple)
     
@@ -41,7 +43,7 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, ply, alpha, beta, turnMultip
    
         nextMoves = gs.getValidMoves()
 
-        score = -findMoveNegaMaxAlphaBeta(gs, nextMoves, depth-1, ply + 1, -beta, -alpha, -turnMultiple)
+        score = -NegaMaxAlphaBeta(gs, nextMoves, depth-1, ply + 1, -beta, -alpha, -turnMultiple)
         if score > maxScore:
             maxScore = score
             if ply == 0:
@@ -61,7 +63,7 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, ply, alpha, beta, turnMultip
     return maxScore
 
 
-
+# Evaluate quiet position
 def quiescenceSearch(gs, alpha, beta, turnMultiple):
     global counter
     counter += 1
@@ -71,6 +73,7 @@ def quiescenceSearch(gs, alpha, beta, turnMultiple):
     if eval >= beta:
         return beta
 
+    # Get capture move only
     captureMoves = gs.getCaptureMoves()
     MoveOrdering.orderMoves(gs,captureMoves)
 

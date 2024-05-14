@@ -114,15 +114,11 @@ def main():
             elif event.type == p.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
                 if pvp_button.collidepoint(mouse_pos):
-                    # p.draw.rect(screen, p.Color(200,200,200), p.Rect(150, 250, 200, 50))
-                    playerOne = not True
-                    playerTwo = not True
+                    playerOne = True
+                    playerTwo = True
                     play_mode_selected = False
                 elif pvc_button.collidepoint(mouse_pos):
-                    # p.draw.rect(screen, p.Color(200,200,200), p.Rect(150, 350, 200, 50))
-                    # playerOne = False
-                    # playerTwo = False
-                    # play_mode_selected = True
+    
                     side_selected = True
                     while side_selected:
                         for event in p.event.get():
@@ -212,7 +208,7 @@ def main():
                 AIThinking = True
                 print("thinking...")
                 returnQueue = Queue()
-                moveFinderProcess = Process(target = SearchMove.findBestMove, args = (gs, validMoves, returnQueue))
+                moveFinderProcess = Process(target = SearchMove.startSearch, args = (gs, validMoves, returnQueue))
                 moveFinderProcess.start()
             if not moveFinderProcess.is_alive():  
                 print("done thinking")

@@ -6,6 +6,7 @@ def orderMoves(gs, validMoves):
     #move ordering
     moveScores = {}
     for move in validMoves:
+        # move repitition
         if move.moveID in moveScores:
             moveScore += 1000000
             continue
@@ -24,7 +25,9 @@ def orderMoves(gs, validMoves):
         isCapture = capturePieceType != '-'
         opponentCanRecapture = gs.squareUnderAttack(endSquareRow, endSquareCol)
 
+
         if isCapture:
+            # Determine simple winning or losing based on pieces score
             captureMaterialDelta = Evaluation.pieceScore[capturePieceType] - Evaluation.pieceScore[movePieceType]
 
             if opponentCanRecapture:
@@ -37,10 +40,13 @@ def orderMoves(gs, validMoves):
                 
                 moveScore += 80000 + captureMaterialDelta
 
-        if movePieceType == 'p':
+
+        if movePieceType == 'p': 
+            # Pawn Promotion
             if move.isPawnPromotion and  not isCapture:
                 moveScore += 60000
         elif movePieceType != 'K':
+            # Position score on recapture
             toScore = Evaluation.piecePositionScores[movePiece][endSquareRow][endSquareCol]
             fromScore = Evaluation.piecePositionScores[movePiece][startSquareRow][startSquareCol]
             moveScore += toScore - fromScore
