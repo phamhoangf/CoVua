@@ -19,6 +19,9 @@ def startSearch(gs, validMoves, returnQueue):
 
         NegaMaxAlphaBeta(gs, validMoves, depth, 0, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
 
+        if counter >= 20000:
+            break
+
     print(counter)
 
     returnQueue.put(nextMove)
@@ -27,6 +30,9 @@ def NegaMaxAlphaBeta(gs, validMoves, depth, ply, alpha, beta, turnMultiple):
     global nextMove, counter
 
     counter += 1
+
+    if counter >= 20000:
+        return 0
 
     # Consider quiet position while depth reached
     if depth == 0 or gs.checkMate or gs.staleMate:
@@ -65,6 +71,10 @@ def NegaMaxAlphaBeta(gs, validMoves, depth, ply, alpha, beta, turnMultiple):
 def quiescenceSearch(gs, alpha, beta, turnMultiple):
     global counter
     counter += 1
+
+    if counter >= 20000:
+        return 0
+
     eval = turnMultiple * Evaluation.scoreBoard(gs)
 
     alpha = max(alpha, eval)
