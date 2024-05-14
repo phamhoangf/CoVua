@@ -1,6 +1,6 @@
 pieceScore = {
     'K': 0,
-    'Q': 1000,
+    'Q': 900,
     'R': 500,
     'B': 320,
     'N': 300,
@@ -8,6 +8,9 @@ pieceScore = {
 }
 
 endgameMaterialStart = pieceScore['R'] * 2 + pieceScore['B'] + pieceScore['N']
+
+passedPawnBonuses = [ 0, 120, 80, 50, 30, 15, 15 ]
+isolatedPawnPenaltyByCount = [ 0, -10, -25, -50, -75, -75, -75, -75, -75 ]
 
 knightScores = [[-50,-40,-30,-30,-30,-30,-40,-50],
 			[-40,-20,  0,  0,  0,  0,-20,-40],
@@ -177,9 +180,12 @@ def scoreMaterial(gs):
                         if square[0] == 'w':
                             whitePawnEarly += piecePositionScores["wp"][row][col]
                             whitePawnEnd += piecePositionScores["wpE"][row][col]
+                                
+
                         else:
                             blackPawnEarly += piecePositionScores["bp"][row][col]
                             blackPawnEnd += piecePositionScores["bpE"][row][col]
+
                     else:
                         piecePositionScore = piecePositionScores[square][row][col]  
                 

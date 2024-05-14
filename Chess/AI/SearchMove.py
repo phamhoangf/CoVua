@@ -1,3 +1,4 @@
+import time
 from AI import Evaluation
 from AI import MoveOrdering
 import random
@@ -13,8 +14,11 @@ def findBestMove(gs, validMoves, returnQueue):
     counter = 0
     nextMove = None
 
-    findMoveNegaMaxAlphaBeta(gs, validMoves, DEPTH, 0, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
-    
+    for depth in range(1, DEPTH + 1):
+
+        findMoveNegaMaxAlphaBeta(gs, validMoves, depth, 0, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
+        if counter >= 8000:
+            break
 
     print(counter)
 
@@ -26,7 +30,6 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, ply, alpha, beta, turnMultip
     counter += 1
 
     if depth == 0 or gs.checkMate or gs.staleMate:
-        # return turnMultiple * Evaluation.scoreBoard(gs)
         return quiescenceSearch(gs, alpha, beta, turnMultiple)
     
     #move ordering
