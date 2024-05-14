@@ -4,7 +4,6 @@ from AI import MoveOrdering
 import random
 
 CHECKMATE = 9999999
-DEPTH = 3
 
 def findRandomMove(validMoves):
     return validMoves[random.randint(0, len(validMoves)-1)]
@@ -15,7 +14,7 @@ def startSearch(gs, validMoves, returnQueue):
     nextMove = None
 
     # Iterative deppening
-    for depth in range(1, DEPTH + 1):
+    for depth in range(1, gs.depth() + 1):
 
         NegaMaxAlphaBeta(gs, validMoves, depth, 0, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
 
@@ -31,7 +30,7 @@ def NegaMaxAlphaBeta(gs, validMoves, depth, ply, alpha, beta, turnMultiple):
 
     counter += 1
 
-    if counter >= 20000:
+    if counter >= 30000:
         return 0
 
     # Consider quiet position while depth reached
@@ -72,7 +71,7 @@ def quiescenceSearch(gs, alpha, beta, turnMultiple):
     global counter
     counter += 1
 
-    if counter >= 20000:
+    if counter >= 30000:
         return 0
 
     eval = turnMultiple * Evaluation.scoreBoard(gs)

@@ -44,9 +44,9 @@ class GameState():
 
     def depth(self):
         empcnt = sum([row.count('--') for row in self.board])
-        if empcnt < 45:
+        if empcnt < 44:
             return 3
-        elif empcnt < 55:
+        elif empcnt < 56:
             return 4
         else:
             return 5
