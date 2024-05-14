@@ -198,7 +198,10 @@ def main():
                     moveMade = False
                     animate = False
                     gameOver = False
+<<<<<<< HEAD
                     
+=======
+>>>>>>> 8864cd3e6c4233134bd4c2c0c1735f5fc7373d18
         # AI move finder logic
         if not gameOver and not humanTurn and not moveUndone:
             if not AIThinking:
