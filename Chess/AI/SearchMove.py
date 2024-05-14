@@ -18,8 +18,6 @@ def startSearch(gs, validMoves, returnQueue):
     for depth in range(1, DEPTH + 1):
 
         NegaMaxAlphaBeta(gs, validMoves, depth, 0, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
-        if counter >= 8000:
-            break
 
     print(counter)
 

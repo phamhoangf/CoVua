@@ -7,8 +7,6 @@ pieceScore = {
     'p': 100
 }
 
-endgameMaterialStart = pieceScore['R'] * 2 + pieceScore['B'] + pieceScore['N']
-
 
 knightScores = [[-50,-40,-30,-30,-30,-30,-40,-50],
 			[-40,-20,  0,  0,  0,  0,-20,-40],
@@ -152,7 +150,7 @@ def scoreMaterial(gs):
             square = gs.board[row][col]
             if square != '--':
 
-                # Number of queen and minors
+                # Number of white queen and minors
                 if square[1] == 'wQ':
                     numWQueens += 1
                 elif square[1] == 'wR':
@@ -162,6 +160,7 @@ def scoreMaterial(gs):
                 elif square[1] == 'wN':
                     numWKnights += 1
 
+                # Number of black queen and minors
                 if square[1] == 'bQ':
                     numBQueens += 1
                 elif square[1] == 'bR':
@@ -171,10 +170,10 @@ def scoreMaterial(gs):
                 elif square[1] == 'bN':
                     numBKnights += 1
 
-                #score positionally
+                # Score positionally
                 piecePositionScore = 0
-                if square[1] != 'K': # no position score table for king
-                #other pieces
+                if square[1] != 'K': # King is special case leave it for later
+                # Other pieces
                     if square[1] == 'p':
                         if square[0] == 'w':
                             whitePawnEarly += piecePositionScores["wp"][row][col]
@@ -198,7 +197,7 @@ def scoreMaterial(gs):
                     blackMaterialScore += pieceScore[square[1]]
                     
 
-    # calculate engameWeight(0 -> 1)
+    # Calculate engameR(0 -> 1)
     endgameStartWeight = 2 * rookEndgameWeight + 2 * bishopEndgameWeight + 2 * knightEndgameWeight + queenEndgameWeight
     
     whiteEndgameWeightSum = numWQueens * queenEndgameWeight + numWRooks * rookEndgameWeight + numWBishops * bishopEndgameWeight + numWKnights * knightEndgameWeight
@@ -207,11 +206,11 @@ def scoreMaterial(gs):
     whiteEndgameR = 1 - min(1, whiteEndgameWeightSum / endgameStartWeight)
     blackEndgameR = 1 - min(1, blackEndgameWeightSum / endgameStartWeight)
 
-    # force king to edge
+    # King safety
     whiteScore += forceKingEndgameScore(gs.whiteKingLocation, gs.blackKingLocation, whiteMaterialScore, blackMaterialScore, blackEndgameR)
     blackScore += forceKingEndgameScore(gs.blackKingLocation, gs.whiteKingLocation, blackMaterialScore, whiteMaterialScore, whiteEndgameR)
 
-    # pawn early and pawn late phase
+    # Pawn early and pawn late phase
     whiteScore += (int)(whitePawnEarly * (1 - blackEndgameR) + whitePawnEnd * blackEndgameR)
     blackScore += (int)(blackPawnEarly * (1 - whiteEndgameR) + blackPawnEnd * whiteEndgameR)
 
@@ -219,11 +218,11 @@ def scoreMaterial(gs):
     whiteKingRow, whiteKingCol = gs.whiteKingLocation
     blackKingRow, blackKingCol = gs.blackKingLocation
 
-    # king early phase
+    # King early phase
     whiteScore += (int)(piecePositionScores['wK'][whiteKingRow][whiteKingCol] * (1-blackEndgameR))
     blackScore += (int)(piecePositionScores['bK'][blackKingRow][blackKingCol] * (1-whiteEndgameR))
     
-    # king late phase
+    # King late phase
     whiteScore += (int)(piecePositionScores['wKE'][whiteKingRow][whiteKingCol] * (blackEndgameR)) 
     blackScore += (int)(piecePositionScores['bKE'][blackKingRow][blackKingCol] * (whiteEndgameR))
 
@@ -232,7 +231,7 @@ def scoreMaterial(gs):
     return score
 
 
-# This will evaluate to force opponent king to edge
+# This will evaluate the kings safety
 def forceKingEndgameScore(allyKingSquare, opponentKingSquare, myScore, opponentScore, endgameWeight):
     eval = 0
 
