@@ -198,10 +198,7 @@ def main():
                     moveMade = False
                     animate = False
                     gameOver = False
-<<<<<<< HEAD
                     
-=======
->>>>>>> 8864cd3e6c4233134bd4c2c0c1735f5fc7373d18
         # AI move finder logic
         if not gameOver and not humanTurn and not moveUndone:
             if not AIThinking:
@@ -328,7 +325,7 @@ def drawMoveLog(screen, gs, font):
     moveLog = gs.moveLog
     message1 = "Welcome!!!"
     # message2 = "The sides has been randomly chosen."
-    message3 = "Press 'z' to undo the lasted move."
+    message3 = "Press 'z' to undo the lastest move."
     message4 = "Press 'r' to restart the game."
     message5 = "On your turn, select the chess piece you want "
     message6 = "to move and move it to the highlighted squares."
